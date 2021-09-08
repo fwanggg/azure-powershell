@@ -1498,6 +1498,7 @@
     "Get-AzLoadBalancerBackendAddressPoolConfig": "Get-AzureRmLoadBalancerBackendAddressPoolConfig",
     "Add-AzLoadBalancerBackendAddressPoolConfig": "Add-AzureRmLoadBalancerBackendAddressPoolConfig",
     "New-AzLoadBalancerBackendAddressPoolConfig": "New-AzureRmLoadBalancerBackendAddressPoolConfig",
+    "New-AzLoadBalancerBackendAddressPoolTunnelInterfaceConfig": "New-AzureRmLoadBalancerBackendAddressPoolTunnelInterfaceConfig",
     "Remove-AzLoadBalancerBackendAddressPoolConfig": "Remove-AzureRmLoadBalancerBackendAddressPoolConfig",
     "Set-AzLoadBalancerFrontendIpConfig": "Set-AzureRmLoadBalancerFrontendIpConfig",
     "Get-AzLoadBalancerFrontendIpConfig": "Get-AzureRmLoadBalancerFrontendIpConfig",

@@ -45,6 +45,15 @@ Connect-AzAccount [-Environment <String>] -CertificateThumbprint <String> -Appli
  [<CommonParameters>]
 ```
 
+### ServicePrincipalCertificateFileWithSubscriptionId
+```
+Connect-AzAccount [-Environment <String>] -ApplicationId <String> [-ServicePrincipal] -Tenant <String>
+ [-Subscription <String>] [-ContextName <String>] [-SkipContextPopulation] [-MaxContextPopulation <Int32>]
+ [-Force] [-SendCertificateChain] -CertificatePath <String> [-CertificatePassword <SecureString>]
+ [-Scope <ContextModificationScope>] [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
+```
+
 ### AccessTokenWithSubscriptionId
 ```
 Connect-AzAccount [-Environment <String>] [-Tenant <String>] -AccessToken <String> [-GraphAccessToken <String>]
@@ -184,27 +193,27 @@ more information on creating a self-signed certificates and assigning them permi
 [Use Azure PowerShell to create a service principal with a certificate](/azure/active-directory/develop/howto-authenticate-service-principal-powershell)
 
 ```powershell
-$Thumbprint = '0SZTNJ34TCCMUJ5MJZGR8XQD3S0RVHJBA33Z8ZXV'
-$TenantId = '4cd76576-b611-43d0-8f2b-adcb139531bf'
-$ApplicationId = '3794a65a-e4e4-493d-ac1d-f04308d712dd'
+$Thumbprint = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+$TenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyy'
+$ApplicationId = '00000000-0000-0000-0000-00000000'
 Connect-AzAccount -CertificateThumbprint $Thumbprint -ApplicationId $ApplicationId -Tenant $TenantId -ServicePrincipal
 ```
 
 ```Output
-Account             SubscriptionName TenantId            Environment
--------             ---------------- --------            -----------
-xxxx-xxxx-xxxx-xxxx Subscription1    xxxx-xxxx-xxxx-xxxx AzureCloud
+Account                      SubscriptionName TenantId                        Environment
+-------                      ---------------- --------                        -----------
+xxxxxxxx-xxxx-xxxx-xxxxxxxxx Subscription1    yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyy AzureCloud
 
-Account          : 3794a65a-e4e4-493d-ac1d-f04308d712dd
+Account          : xxxxxxxx-xxxx-xxxx-xxxxxxxx
 SubscriptionName : MyTestSubscription
-SubscriptionId   : 85f0f653-1f86-4d2c-a9f1-042efc00085c
-TenantId         : 4cd76576-b611-43d0-8f2b-adcb139531bf
+SubscriptionId   : zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzz
+TenantId         : yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyy
 Environment      : AzureCloud
 ```
 
 ### Example 8: Connect with AuthScope
 AuthScope is used to support scenario that data plane resources have enhanced authentication than ARM resources, e.g. storage needs MFA but ARM does not.
-Once AuthScope is specified, e.g. Storage, Connect-AzAccount will first login with storage scope https://storage.azure.com/, then silently require token for ARM.
+Once AuthScope is specified, e.g. Storage, Connect-AzAccount will first login with storage scope `https://storage.azure.com/`, then silently require token for ARM.
 
 ```powershell
 Connect-AzAccount -AuthScope Storage
@@ -214,6 +223,24 @@ Connect-AzAccount -AuthScope Storage
 Account                SubscriptionName TenantId                Environment
 -------                ---------------- --------                -----------
 yyyy-yyyy-yyyy-yyyy    Subscription1    xxxx-xxxx-xxxx-xxxx     AzureCloud
+```
+
+### Example 9: Connect using certificate file
+
+This example connects to an Azure account using certificate-based service principal authentication.
+The certificate file, which is specified by `CertficatePath`, should contains both certificate and private key as the input.
+
+```powershell
+$securePassword = $plainPassword | ConvertTo-SecureString -AsPlainText -Force
+$TenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyy'
+$ApplicationId = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzz'
+Connect-AzAccount -ServicePrincipal -ApplicationId $ApplicationId -TenantId $TenantId -CertificatePath './certificatefortest.pfx' -CertificatePassword $securePassword
+```
+
+```Output
+Account                     SubscriptionName TenantId                        Environment
+-------                     ---------------- --------                        -----------
+xxxxxxxx-xxxx-xxxx-xxxxxxxx Subscription1    yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyy AzureCloud
 ```
 
 ## PARAMETERS
@@ -275,7 +302,7 @@ Application ID of the service principal.
 
 ```yaml
 Type: System.String
-Parameter Sets: ServicePrincipalCertificateWithSubscriptionId
+Parameter Sets: ServicePrincipalCertificateWithSubscriptionId, ServicePrincipalCertificateFileWithSubscriptionId
 Aliases:
 
 Required: True
@@ -286,7 +313,7 @@ Accept wildcard characters: False
 ```
 
 ### -AuthScope
-Optional OAuth scope for login, supported pre-defined values: AadGraph, AnalysisServices, Attestation, Batch, DataLake, KeyVault, OperationalInsights, Storage, Synapse. It also supports resource id like 'https://storage.azure.com/'.
+Optional OAuth scope for login, supported pre-defined values: AadGraph, AnalysisServices, Attestation, Batch, DataLake, KeyVault, OperationalInsights, Storage, Synapse. It also supports resource id like `https://storage.azure.com/`.
 
 ```yaml
 Type: System.String
@@ -294,6 +321,36 @@ Parameter Sets: UserWithSubscriptionId, ServicePrincipalWithSubscriptionId, User
 Aliases: AuthScopeTypeName
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CertificatePassword
+The password required to access the pkcs#12 certificate file.
+
+```yaml
+Type: System.Security.SecureString
+Parameter Sets: ServicePrincipalCertificateFileWithSubscriptionId
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CertificatePath
+The path of certficate file in pkcs#12 format.
+
+```yaml
+Type: System.String
+Parameter Sets: ServicePrincipalCertificateFileWithSubscriptionId
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -486,7 +543,7 @@ Specifies if the x5c claim (public key of the certificate) should be sent to the
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
-Parameter Sets: ServicePrincipalCertificateWithSubscriptionId
+Parameter Sets: ServicePrincipalCertificateWithSubscriptionId, ServicePrincipalCertificateFileWithSubscriptionId
 Aliases:
 
 Required: False
@@ -514,7 +571,7 @@ Accept wildcard characters: False
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
-Parameter Sets: ServicePrincipalCertificateWithSubscriptionId
+Parameter Sets: ServicePrincipalCertificateWithSubscriptionId, ServicePrincipalCertificateFileWithSubscriptionId
 Aliases:
 
 Required: False
@@ -594,7 +651,7 @@ Accept wildcard characters: False
 
 ```yaml
 Type: System.String
-Parameter Sets: ServicePrincipalWithSubscriptionId, ServicePrincipalCertificateWithSubscriptionId
+Parameter Sets: ServicePrincipalWithSubscriptionId, ServicePrincipalCertificateWithSubscriptionId, ServicePrincipalCertificateFileWithSubscriptionId
 Aliases: Domain, TenantId
 
 Required: True

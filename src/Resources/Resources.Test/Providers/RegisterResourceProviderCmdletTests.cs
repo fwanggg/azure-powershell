@@ -111,16 +111,16 @@ namespace Microsoft.Azure.Commands.Resources.Test
 
             this.providerOperationsMock
                 .Setup(client => client.RegisterWithHttpMessagesAsync(It.IsAny<string>(), It.IsAny<ProviderRegistrationRequest>(), null ,It.IsAny<CancellationToken>()))
-                .Callback((string providerName, ProviderRegistrationRequest providerRegistrationRequest, Dictionary<string, List<string>> customHeaders, CancellationToken ignored) =>
+                .Callback((string providerName, ProviderRegistrationRequest properties, Dictionary<string, List<string>> customHeaders, CancellationToken ignored) =>
                 {
                     Assert.Equal(ProviderName, providerName, StringComparer.OrdinalIgnoreCase);
                     if (this.cmdlet.ConsentToPermissions)
                     {
-                        Assert.True(providerRegistrationRequest.ThirdPartyProviderConsent.ConsentToAuthorization);
+                        Assert.True(properties.ThirdPartyProviderConsent.ConsentToAuthorization);
                     }
                     else
                     {
-                        Assert.Null(providerRegistrationRequest);
+                        Assert.Null(properties);
                     }
                 })
                 .Returns(() => Task.FromResult(new AzureOperationResponse<Provider>() {
