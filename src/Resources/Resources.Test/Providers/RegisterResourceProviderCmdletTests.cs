@@ -110,9 +110,19 @@ namespace Microsoft.Azure.Commands.Resources.Test
             var registrationResult = provider;
 
             this.providerOperationsMock
-                .Setup(client => client.RegisterWithHttpMessagesAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()))
-                .Callback((string providerName, Dictionary<string, List<string>> customHeaders, CancellationToken ignored) =>
-                        Assert.Equal(ProviderName, providerName, StringComparer.OrdinalIgnoreCase))
+                .Setup(client => client.RegisterWithHttpMessagesAsync(It.IsAny<string>(), It.IsAny<ProviderRegistrationRequest>(), null ,It.IsAny<CancellationToken>()))
+                .Callback((string providerName, ProviderRegistrationRequest providerRegistrationRequest, Dictionary<string, List<string>> customHeaders, CancellationToken ignored) =>
+                {
+                    Assert.Equal(ProviderName, providerName, StringComparer.OrdinalIgnoreCase);
+                    if (this.cmdlet.ConsentToPermissions)
+                    {
+                        Assert.True(providerRegistrationRequest.ThirdPartyProviderConsent.ConsentToAuthorization);
+                    }
+                    else
+                    {
+                        Assert.Null(providerRegistrationRequest);
+                    }
+                })
                 .Returns(() => Task.FromResult(new AzureOperationResponse<Provider>() {
                     Body = registrationResult
                 }));
@@ -141,6 +151,12 @@ namespace Microsoft.Azure.Commands.Resources.Test
 
             this.VerifyCallPatternAndReset(succeeded: true);
 
+            this.cmdlet.ConsentToPermissions = true;
+
+            this.cmdlet.ExecuteCmdlet();
+
+            this.VerifyCallPatternAndReset(succeeded: true);
+
             // 2. register fails w/ error
             //registrationResult.StatusCode = HttpStatusCode.NotFound;
             registrationResult = null;
@@ -161,7 +177,7 @@ namespace Microsoft.Azure.Commands.Resources.Test
         /// </summary>
         private void VerifyCallPatternAndReset(bool succeeded)
         {
-            this.providerOperationsMock.Verify(f => f.RegisterWithHttpMessagesAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Once());
+            this.providerOperationsMock.Verify(f => f.RegisterWithHttpMessagesAsync(It.IsAny<string>(), It.IsAny<ProviderRegistrationRequest>(), null, It.IsAny<CancellationToken>()), Times.Once());
             this.commandRuntimeMock.Verify(f => f.WriteObject(It.IsAny<object>()), succeeded ? Times.Once() : Times.Never());
 
             this.providerOperationsMock.ResetCalls();
