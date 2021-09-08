@@ -65,6 +65,7 @@ namespace Microsoft.Azure.Commands.Resources.Models
                 ResourceId = identifier.ToString()
             };
         }
+        
         public static PSPermission ToPSPermission(this AuthorizationPermission permission)
         {
             return new PSPermission
